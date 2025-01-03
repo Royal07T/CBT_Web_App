@@ -6,17 +6,11 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
-
-// Default route for the welcome page
-Route::get('/', function () {
-    return view('welcome');
-});
-
 // Authentication Routes
-Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'postLogin'])->name('login.post');
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'postRegister'])->name('register.post');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login'); // Renamed from 'login' to 'showLoginForm'
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register'); // Renamed from 'register' to 'showRegistrationForm'
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated Routes

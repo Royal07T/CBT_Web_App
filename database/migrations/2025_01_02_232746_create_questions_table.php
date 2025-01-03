@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('question');
             $table->enum('type', ['objective', 'theory']);
             $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->string('correct_answer')->nullable(); // Add this line for the correct_answer column
             $table->timestamps();
 
             // Index for the exam_id for faster querying

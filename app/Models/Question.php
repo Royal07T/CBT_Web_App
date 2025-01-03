@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     // Mass assignment protection
-    protected $fillable = ['question', 'type', 'exam_id'];
+    protected $fillable = ['question', 'type', 'exam_id', 'correct_answer'];
 
     // Relationship to Exam
     public function exam()
