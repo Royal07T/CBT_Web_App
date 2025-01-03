@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create the 'results' table
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->integer('score');
-            $table->timestamps();
+            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade'); // Foreign key to exams
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign key to users
+            $table->integer('score'); // Score field
+            $table->timestamps(); // Timestamps for created_at and updated_at
 
             // Index for exam_id and user_id for faster querying
             $table->index('exam_id');
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('results');
+        Schema::dropIfExists('results'); // Drop the results table if it exists
     }
 };

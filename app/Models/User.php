@@ -2,35 +2,51 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
-    protected $fillable = ['name', 'email', 'password'];
+    // Mass assignment protection
+    protected $fillable = ['first_name', 'middle_name', 'last_name', 'email', 'password', 'role'];
 
-    protected $hidden = ['password', 'remember_token'];
-
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-    // Relationship to Courses (Teacher's courses)
-    public function courses()
-    {
-        return $this->hasMany(Course::class, 'teacher_id');
-    }
-
-    // Relationship to Results (Student's results)
+    // Relationship with Result model
     public function results()
     {
         return $this->hasMany(Result::class);
+    }
+
+    // Get the user's full name (first, middle, last)
+    public function getFullNameAttribute()
+    {
+        // Combine first, middle, and last names
+        return $this->first_name . ' ' . ($this->middle_name ? $this->middle_name . ' ' : '') . $this->last_name;
+    }
+
+    // Scope for students
+    public function scopeStudents($query)
+    {
+        return $query->where('role', 'student');
+    }
+
+    // Scope for teachers
+    public function scopeTeachers($query)
+    {
+        return $query->where('role', 'teacher');
+    }
+
+    // Check if user is a student
+    public function isStudent()
+    {
+        return $this->role === 'student';
+    }
+
+    // Check if user is a teacher
+    public function isTeacher()
+    {
+        return $this->role === 'teacher';
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\Result;  // Assuming you have a Result model for saving exam results
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,13 @@ class StudentController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        // Ensure only students can access student routes
+        $this->middleware(function ($request, $next) {
+            if (Auth::user()->role !== 'student') {
+                return redirect()->route('dashboard')->withErrors(['error' => 'You do not have permission to access this page.']);
+            }
+            return $next($request);
+        });
     }
 
     /**
@@ -22,8 +30,6 @@ class StudentController extends Controller
     {
         // Ensure $exam is a single instance of the Exam model (using findOrFail to retrieve a single exam)
         $exam = Exam::findOrFail($examId);
-
-        dd($exam);
 
         // Validate the submitted answers
         $request->validate([
@@ -85,13 +91,37 @@ class StudentController extends Controller
 
         // Loop through the exams and calculate the scores
         foreach ($exams as $exam) {
-            $score = $exam->results->where('student_id', Auth::id())->first()->score;
-            $maxScore = $exam->questions->count();  // assuming each question has equal weight
-            $totalScore += $score;
-            $totalMaxScore += $maxScore;
+            $result = $exam->results->where('student_id', Auth::id())->first();
+            if ($result) {
+                $score = $result->score;
+                $maxScore = $exam->questions->count();  // assuming each question has equal weight
+                $totalScore += $score;
+                $totalMaxScore += $maxScore;
+            }
         }
 
         // Return a view to display the student's overall results
         return view('student.results', compact('totalScore', 'totalMaxScore', 'exams'));
+    }
+
+    /**
+     * View the student's exams.
+     */
+    public function viewExams()
+    {
+        // Get all the exams available to the student
+        $exams = Exam::all();
+
+        return view('student.exams', compact('exams'));
+    }
+
+    /**
+     * View a single exam's questions.
+     */
+    public function viewExam($examId)
+    {
+        $exam = Exam::with('questions')->findOrFail($examId);
+
+        return view('student.exam', compact('exam'));
     }
 }

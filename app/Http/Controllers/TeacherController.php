@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\Exam;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -12,6 +13,13 @@ class TeacherController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        // Ensure only teachers can access teacher routes
+        $this->middleware(function ($request, $next) {
+            if (Auth::user()->role !== 'teacher') {
+                return redirect()->route('dashboard')->withErrors(['error' => 'You do not have permission to access this page.']);
+            }
+            return $next($request);
+        });
     }
 
     /**
@@ -52,5 +60,31 @@ class TeacherController extends Controller
         $exam = Exam::where('id', $examId)->where('teacher_id', Auth::id())->firstOrFail();
 
         return view('teacher.gradeExam', compact('exam'));
+    }
+
+    /**
+     * Assign a course to the teacher.
+     */
+    public function assignCourse(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+        ]);
+
+        // Assign course to teacher
+        $teacher = Auth::user();
+        $teacher->courses()->attach($request->course_id);
+
+        return redirect()->route('teacher.dashboard')->with('success', 'Course assigned successfully.');
+    }
+
+    /**
+     * View the teacher's assigned courses.
+     */
+    public function viewAssignedCourses()
+    {
+        $courses = Auth::user()->courses; // Get courses assigned to the teacher
+
+        return view('teacher.courses', compact('courses'));
     }
 }

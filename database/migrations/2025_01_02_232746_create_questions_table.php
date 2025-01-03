@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create the 'questions' table
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->text('question');
-            $table->enum('type', ['objective', 'theory']);
-            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
-            $table->string('correct_answer')->nullable(); // Add this line for the correct_answer column
+            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade'); // Foreign key to exams
+            $table->string('question'); // The question text
+            $table->enum('type', ['multiple_choice', 'short_answer', 'true_false']); // Type of question
+            $table->string('correct_answer'); // Correct answer (for short answers or MCQs)
+            $table->json('options')->nullable(); // Options for multiple-choice questions (stored as JSON)
             $table->timestamps();
 
-            // Index for the exam_id for faster querying
+            // Index for exam_id for faster querying
             $table->index('exam_id');
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('questions'); // Drop the questions table if it exists
     }
 };
