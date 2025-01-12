@@ -34,6 +34,7 @@ class StudentController extends Controller
         // Validate the submitted answers
         $request->validate([
             'answers' => 'required|array', // Ensure the answers are passed as an array
+            'answers.*' => 'exists:questions,id', // Ensure the answer keys are valid question IDs
         ]);
 
         // Check if the user is authenticated
